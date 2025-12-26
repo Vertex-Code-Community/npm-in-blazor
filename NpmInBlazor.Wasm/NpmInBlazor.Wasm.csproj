@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
+      <ProjectReference Include="..\NpmInBlazor.SimpleStatistics\NpmInBlazor.SimpleStatistics.csproj" />
     </ItemGroup>
 
 </Project>

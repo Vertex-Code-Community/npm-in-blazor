@@ -1,16 +1,48 @@
 @page "/"
 
-<div class="page-container">
-    <div class="inner-container">
-        <div class="barcode-container">
-            <div class="barcode">
-                @* <Barcode128C BarcodeSequence="@_barcodeSequence"/> *@
-            </div>
-            <div class="form">
-                <input placeholder="Type number here"/>
+@* <div class="page-container"> *@
+@*     <div class="inner-container"> *@
+@*         <div class="barcode-container"> *@
+@*             <div class="barcode"> *@
+@*                 $1$ <Barcode128C BarcodeSequence="@_barcodeSequence"/> #1# *@
+@*             </div> *@
+@*             <div class="form"> *@
+@*                 <input placeholder="Type number here"/> *@
+@* *@
+@*                 <button @onclick="() => { }">Generate Barcode</button> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
 
-                <button @onclick="() => { }">Generate Barcode</button>
-            </div>
-        </div>
-    </div>
-</div>
+@inject IJSRuntime JS
+
+<button @onclick="Run">Run</button>
+
+@if (Rows is not null)
+{
+    <table class="table">
+        <thead>
+        <tr><th>Metric</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var r in Rows)
+        {
+            <tr>
+                <td>@r.metric</td>
+                <td>@r.value</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    StatRow[]? Rows;
+
+    async Task Run()
+    {
+        var numbers = new[] { 1.0, 2.0, 3.0, 10.0 };
+        Rows = await JS.InvokeAsync<StatRow[]>("simpleStats.analyzeNumbers", numbers);
+    }
+}
