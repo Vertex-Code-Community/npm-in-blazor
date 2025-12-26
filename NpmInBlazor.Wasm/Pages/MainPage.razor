@@ -1,0 +1,16 @@
+@page "/"
+
+<div class="page-container">
+    <div class="inner-container">
+        <div class="barcode-container">
+            <div class="barcode">
+                @* <Barcode128C BarcodeSequence="@_barcodeSequence"/> *@
+            </div>
+            <div class="form">
+                <input placeholder="Type number here"/>
+
+                <button @onclick="() => { }">Generate Barcode</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpmInBlazor.Wasm", "NpmInBlazor.Wasm\NpmInBlazor.Wasm.csproj", "{7A2225E9-4220-4D67-B364-D6138A7B53BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpmInBlazor.SimpleStatistics", "NpmInBlazor.SimpleStatistics\NpmInBlazor.SimpleStatistics.csproj", "{00CCDB63-55F5-4BFD-82E3-422F4B49702C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7A2225E9-4220-4D67-B364-D6138A7B53BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A2225E9-4220-4D67-B364-D6138A7B53BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A2225E9-4220-4D67-B364-D6138A7B53BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A2225E9-4220-4D67-B364-D6138A7B53BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00CCDB63-55F5-4BFD-82E3-422F4B49702C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00CCDB63-55F5-4BFD-82E3-422F4B49702C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00CCDB63-55F5-4BFD-82E3-422F4B49702C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00CCDB63-55F5-4BFD-82E3-422F4B49702C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
