@@ -1,48 +1,170 @@
 @page "/"
-
-@* <div class="page-container"> *@
-@*     <div class="inner-container"> *@
-@*         <div class="barcode-container"> *@
-@*             <div class="barcode"> *@
-@*                 $1$ <Barcode128C BarcodeSequence="@_barcodeSequence"/> #1# *@
-@*             </div> *@
-@*             <div class="form"> *@
-@*                 <input placeholder="Type number here"/> *@
-@* *@
-@*                 <button @onclick="() => { }">Generate Barcode</button> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
-
+@using System.Globalization
+@using System.Text.Json
 @inject IJSRuntime JS
 
-<button @onclick="Run">Run</button>
+<PageTitle>Simple Statistics Playground</PageTitle>
 
-@if (Rows is not null)
-{
-    <table class="table">
-        <thead>
-        <tr><th>Metric</th><th>Value</th></tr>
-        </thead>
-        <tbody>
-        @foreach (var r in Rows)
-        {
-            <tr>
-                <td>@r.metric</td>
-                <td>@r.value</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+<div class="page-shell">
+    <header class="hero">
+        <p class="eyebrow">simple-statistics npm · Blazor WASM</p>
+        <h1>Simple Statistics playground</h1>
+        <p class="lede">
+            Interact with the npm package via the functions exposed in <code>src/index.js</code>.
+            Tweak the data, run the JS interop calls, and explore the results live.
+        </p>
+        <div class="hero-actions">
+            <button class="btn primary" @onclick="RunAnalyzeNumbers">Run quick demo</button>
+            <button class="btn ghost" @onclick="ResetAll">Reset data</button>
+        </div>
+    </header>
 
-@code {
-    StatRow[]? Rows;
+    <section class="demo-grid">
+        <article class="card span-2">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">analyzeNumbers(values: number[])</p>
+                    <h2>Describe a list of numbers</h2>
+                    <p class="muted">Paste numbers, hit “Analyze”, and see summary stats.</p>
+                </div>
+                <button class="btn ghost small" @onclick="ResetNumbers">Use sample</button>
+            </div>
 
-    async Task Run()
-    {
-        var numbers = new[] { 1.0, 2.0, 3.0, 10.0 };
-        Rows = await JS.InvokeAsync<StatRow[]>("simpleStats.analyzeNumbers", numbers);
-    }
-}
+            <div class="stack">
+                <label class="label">Numbers (comma, space, or newline separated)</label>
+                <textarea class="input" rows="4" @bind="numberInput"></textarea>
+                <div class="actions">
+                    <button class="btn primary" @onclick="RunAnalyzeNumbers">Analyze numbers</button>
+                    <span class="hint">Uses <code>simpleStats.analyzeNumbers</code> from the npm bundle.</span>
+                </div>
+
+                @if (numberStats is not null)
+                {
+                    <div class="stats-grid">
+                        @foreach (var stat in numberStats)
+                        {
+                            <div class="stat-chip">
+                                <span class="stat-label">@stat.metric</span>
+                                <span class="stat-value">@FormatValue(stat.value)</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">analyzeColumn(rows, column)</p>
+                    <h2>Analyze a column</h2>
+                    <p class="muted">Edit the tiny dataset, pick a column, and compute metrics.</p>
+                </div>
+                <button class="btn ghost small" @onclick="AddColumnRow">Add row</button>
+            </div>
+
+            <div class="stack">
+                <div class="data-table">
+                    <div class="data-table-head">
+                        <span>Name</span>
+                        <span>Age</span>
+                        <span>Score</span>
+                        <span></span>
+                    </div>
+                    @for (var i = 0; i < columnRows.Count; i++)
+                    {
+                        var index = i;
+                        <div class="data-table-row">
+                            <input class="input" @bind="columnRows[index].Name" />
+                            <input class="input" type="number" step="0.1" @bind="columnRows[index].Age" />
+                            <input class="input" type="number" step="0.1" @bind="columnRows[index].Score" />
+                            <button class="btn ghost small" title="Remove row" @onclick="() => RemoveColumnRow(index)">✕</button>
+                        </div>
+                    }
+                </div>
+
+                <div class="controls">
+                    <label class="label">Column to analyze</label>
+                    <select class="input" @bind="selectedColumnKey">
+                        <option value="age">Age</option>
+                        <option value="score">Score</option>
+                    </select>
+                </div>
+
+                <div class="actions">
+                    <button class="btn primary" @onclick="RunAnalyzeColumn">Analyze column</button>
+                    <span class="hint">Calls <code>simpleStats.analyzeColumn</code> with the rows above.</span>
+                </div>
+
+                @if (columnStats is not null)
+                {
+                    <div class="stats-grid">
+                        @foreach (var stat in columnStats)
+                        {
+                            <div class="stat-chip">
+                                <span class="stat-label">@stat.metric</span>
+                                <span class="stat-value">@FormatValue(stat.value)</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">linearRegressionTable(rows, xKey, yKey)</p>
+                    <h2>Fit a line</h2>
+                    <p class="muted">Adjust the points and compute slope, intercept, and R².</p>
+                </div>
+                <div class="button-group">
+                    <button class="btn ghost small" @onclick="ResetRegression">Reset sample</button>
+                    <button class="btn ghost small" @onclick="AddRegressionRow">Add point</button>
+                </div>
+            </div>
+
+            <div class="stack">
+                <div class="data-table">
+                    <div class="data-table-head">
+                        <span>X</span>
+                        <span>Y</span>
+                        <span></span>
+                    </div>
+                    @for (var i = 0; i < regressionPoints.Count; i++)
+                    {
+                        var index = i;
+                        <div class="data-table-row">
+                            <input class="input" type="number" step="0.1" @bind="regressionPoints[index].X" />
+                            <input class="input" type="number" step="0.1" @bind="regressionPoints[index].Y" />
+                            <button class="btn ghost small" title="Remove point" @onclick="() => RemoveRegressionRow(index)">✕</button>
+                        </div>
+                    }
+                </div>
+
+                <div class="actions">
+                    <button class="btn primary" @onclick="RunRegression">Run regression</button>
+                    <span class="hint">Invokes <code>simpleStats.linearRegressionTable</code> using keys “x” and “y”.</span>
+                </div>
+
+                @if (regressionStats is not null)
+                {
+                    <div class="line-summary">
+                        <div class="equation">y = @FormatValue(TryGetMetric(regressionStats, "slope(m)") ?? 0) · x + @FormatValue(TryGetMetric(regressionStats, "intercept(b)") ?? 0)</div>
+                        <div class="r2">R² = @FormatValue(TryGetMetric(regressionStats, "r2") ?? 0)</div>
+                    </div>
+
+                    <div class="stats-grid">
+                        @foreach (var stat in regressionStats)
+                        {
+                            <div class="stat-chip">
+                                <span class="stat-label">@stat.metric</span>
+                                <span class="stat-value">@FormatValue(stat.value)</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </article>
+    </section>
+</div>
